@@ -9,10 +9,10 @@
 #define W_HEIGHT 800
 
 /* how many seconds before next cells update*/
-#define UPDATE_TIME 1.0
+#define UPDATE_TIME 0.1
 
 /* matrix and cells settings */
-#define DRAW_MAT 1
+#define DRAW_MAT 0
 #define M_COLS 52
 #define M_ROWS 52
 #define CELL_SIZE 15
@@ -120,49 +120,48 @@ void fillRect(SDL_Renderer *renderer, int x, int y, int w, int h) {
 
 /* initialize cells in a random way */
 void cells_init() {
-
-    /* start with everything dead */
     for (int i=0; i < M_COLS; i++) {
         for (int j=0; j < M_ROWS; j++) {
-            cells[i][j] = 0;
-        }
-    }
-
-    /* create a center of alive cells */
-    int x = M_COLS / 2;
-    int y = M_ROWS / 2;
-
-    for(int i=-2; i <= 2; i++) {
-        for(int j=-2; j <= 2; j++) {
-            cells[x+i][y+j] = 1;
+            cells[i][j] = rand() % 2;
         }
     }
 }
 
 /* update cells state */
 void cells_update() {
+
+    /* temporary cell state */
+    char state_cells[M_COLS][M_ROWS];
+    for (int i=0; i < M_COLS; i++) {
+        for (int j=0; j < M_ROWS; j++) {
+            state_cells[i][j] = cells[i][j];
+        }
+    }
+
     /* n alive cells around */
     int cnt = 0;
 
     for (int i=0; i < M_COLS; i++) {
         for (int j=0; j < M_ROWS; j++) {
+            cnt = 0;
 
             for (int k=-1; k <= 1; k++) {
-                for (int h=-1; h<=1; h++) {
-                    if ( (i+k) >= 0 && (i+k) < M_COLS && (j+h) >= 0 && (j+h) < M_ROWS )
-                        if (cells[i+k][j+h] == 1)
-                            ++cnt;
+                for (int h=-1; h <= 1; h++) {
+                    if ( (i+k) >= 0 && (i+k) < M_COLS && (j+h) >= 0 && (j+h) < M_COLS && (k != 0 || h != 0) ) {
+                        if (state_cells[i+k][j+h] == 1) {
+                            cnt++;
+                        }
+                    }
                 }
             }
 
-            if (cells[i][j] == ALIVE) {
-                --cnt;
-                /* kill cell if underpop or overpop*/
-                if (cnt < 2 || cnt > 3) 
-                    cells[i][j] = DEAD;
-
-            }else if(cells[i][j] == DEAD && cnt == 3) {
-                cells[i][j] = ALIVE;
+            if (state_cells[i][j] == 1) {
+                if(cnt < 2 || cnt > 3) {
+                    cells[i][j] = 0;
+                }
+            }
+            if (state_cells[i][j] == 0 && cnt == 3) {
+                cells[i][j] = 1;
             }
         }
     }    
