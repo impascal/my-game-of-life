@@ -73,7 +73,7 @@ int main(int argc, const char *argv[]) {
         start_time = clock();
 
         /* handle events */
-        SDL_PollEvent(&event);
+        while(SDL_PollEvent(&event)) {
             switch(event.type) {
             case SDL_QUIT:
                 fprintf(stdout, "Quitting...\n");
@@ -82,6 +82,7 @@ int main(int argc, const char *argv[]) {
             default:
                 break;
             }
+        }
 
         /* update stuff periodically and reset timer */
         if (timer >= UPDATE_TIME && timer != 0) {
